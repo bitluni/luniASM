@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="interpreter.js"></script>
+		<script>
+			const xres = 16;
+			const yres = 15;
+			let canvas = 0;
+			let ctx = 0;
+			let imageData = 0;
+
+			function loop()
+			{
+				//draw frame
+				ctx.putImageData(imageData, 0, 0);
+				requestAnimationFrame(loop);
+			}
+
+			function pix(x, y, rgb)
+			{
+				let p = (x + y * xres) * 4;
+				imageData.data[p++] = rgb & 255;
+				imageData.data[p++] = (rgb >> 8) & 255;
+				imageData.data[p++] = (rgb >> 16) & 255;
+				imageData.data[p++] = 255;
+			}
+
+			function init()
+			{
+				canvas = document.querySelector("canvas");
+				canvas.width = xres;
+				canvas.height = yres;
+				ctx = canvas.getContext("2d")
+				imageData = ctx.getImageData(0, 0, xres, yres);
+				pix(0, 0, 0x000080);
+				requestAnimationFrame(loop);
+			}
+		</script>
+		<style>
+			body
+			{
+				background-color: #222;
+			}
+			canvas
+			{
+				image-rendering: pixelated;
+				zoom: 16.0;
+				border-style: solid;
+				border-color: #ff1493;
+				border-width: 0.1px;
+			}
+			textarea
+			{
+				background-color: #222;
+			}
+		</style>
+	</head>
+	<body onload="init()">
+		<table>
+			<tr>
+				<td style="vertical-align: top;" rowspan="2"><textarea id="code" cols="80" rows="64"></textarea></td>
+				<td style="vertical-align: top;"><canvas width="16" height="15"></canvas>
+				<br><button>L</button><button>R</button><button>U</button><button>D</button><button>B</button><button>B</button>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>
