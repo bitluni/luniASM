@@ -87,10 +87,12 @@ x:
 	inc					//pops value, increments, pushes value
 	stor				//pops value, pops address from before, and stores value to address
 	dec					//pops value (initially 16), decrements and pushes 
-	jnz x				//pops value, compares, pushes back and jumps to x if not zero
+	push x				//pushes address of label x
+	jnz					//pops label, pops value, compares, pushes back value and jumps to label if not zero
 	pop					//pop
-	dec					//pops value (initially 15), decrements and pushes 
-	jnz y				//pops value, compares, pushes back and jumps to y if not zero
+	dec					//pops value (initially 15), decrements and pushes
+	push y				//pushes address of label x
+	jnz					//pops value, compares, pushes back and jumps to y if not zero
 	pop					//pop
 	pop					//pop
 					</textarea></td>
