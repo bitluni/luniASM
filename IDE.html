@@ -48,20 +48,60 @@
 				border-style: solid;
 				border-color: #ff1493;
 				border-width: 0.1px;
+				background-color: black;
 			}
 			textarea
 			{
-				background-color: #222;
+				background-color: #111;
+				border-color: #ff1493;
+				border-width: 2px;
+				border-style: solid;
+				color: #ff1493;
+				overflow-x: auto;
+				text-wrap: nowrap;
+				tab-size: 4;
+			}
+			td
+			{
+				vertical-align: top;
 			}
 		</style>
 	</head>
 	<body onload="init()">
 		<table>
 			<tr>
-				<td style="vertical-align: top;" rowspan="2"><textarea id="code" cols="80" rows="64"></textarea></td>
-				<td style="vertical-align: top;"><canvas width="16" height="15"></canvas>
-				<br><button>L</button><button>R</button><button>U</button><button>D</button><button>B</button><button>B</button>
+					<td rowspan="2"><textarea id="code" cols="80" rows="64">
+	push 	0x0000		//pushes 0x0000 on stack (user memory)
+	push	0xa000		//pushes 0xa000 on stack (frame buffer)
+	stor				//pops value 0xa000, pops 0x0000 as address and stores value to address
+	push	15			//pushes 15 on stack
+y:
+	push 	16			//pushed 16 on stack
+x:
+	push	0x0000		//pushed 0x0000 on stack
+	load				//pops 0x0000 as address, loads from address and pushes on stack
+	push 	0x000080	//pushes rgb red on stack
+	push	0x0000		//pushes address to for store back later
+	push	0x0000		//pushes address to for load
+	load				//pops address, loads value and pushes on stack
+	inc					//pops value, increments, pushes value
+	stor				//pops value, pops address from before, and stores value to address
+	dec					//pops value (initially 16), decrements and pushes 
+	jnz x				//pops value, compares, pushes back and jumps to x if not zero
+	pop					//pop
+	dec					//pops value (initially 15), decrements and pushes 
+	jnz y				//pops value, compares, pushes back and jumps to y if not zero
+	pop					//pop
+	pop					//pop
+					</textarea></td>
+					<td><canvas width="16" height="15"></canvas>
+					<br><button>L</button><button>R</button><button>U</button><button>D</button><button>B</button><button>A</button>
+					<br>
+					<br><button>RUN</button><button>UPLOAD</button>
 				</td>
+			</tr>
+			<tr>
+				<td><td>
 			</tr>
 		</table>
 	</body>
