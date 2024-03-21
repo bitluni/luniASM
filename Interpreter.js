@@ -332,16 +332,16 @@ class Interpreter
 //ALU
 	and()
 	{
-		let b = this.pop();
-		let a = this.pop();
-		this.push(a & b);
+		let v2 = this.pop();
+		let v1 = this.pop();
+		this.push(v1 & v2);
 	}
 
 	or()
 	{
-		let b = this.pop();
-		let a = this.pop();
-		this.push(a | b);
+		let v2 = this.pop();
+		let v1 = this.pop();
+		this.push(v1 | v2);
 	}
 
 	xor()
@@ -353,8 +353,8 @@ class Interpreter
 
 	not()
 	{
-		let a = this.pop();
-		this.push(~a);
+		let v = this.pop();
+		this.push(~v);
 	}
 
 	inc()
@@ -417,4 +417,16 @@ class Interpreter
 		let a = this.pop();
 		this.push(a % b);
 	}
+
+	neg()
+	{
+		let v = this.pop();
+		this.push(-v);
+	}
+
+	abs()
+	{
+		let v = this.pop();
+		this.push(v < 0 ? -v : v);
+	}	
 };
