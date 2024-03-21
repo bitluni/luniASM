@@ -74,6 +74,38 @@
 				return localStorage.getItem("code");
 			}
 
+			function downloadFile(fileName, data) 
+			{
+				const url = URL.createObjectURL(new Blob([data]));
+				const link = document.createElement('a');
+				link.href = url;
+				link.download = fileName;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				URL.revokeObjectURL(url);
+			}
+
+			function downloadBin()
+			{
+				const code = compiler.compile(document.querySelector("textarea").value, console);
+				if(code)
+					downloadFile(document.querySelector("#filename").value, code);
+			}
+
+			function loadBin(event)
+			{
+				const file = event.target.files[0];
+				const reader = new FileReader();
+				reader.onload = function(e) 
+				{
+					const code = new Uint8Array(e.target.result);
+					console.log(compiler.decompile(code));
+					interpreter = new Interpreter(code, new MemoryMap());
+				}
+				reader.readAsArrayBuffer(file);
+			}	
+
 		</script>
 		<style>
 			body
@@ -153,7 +185,9 @@ x:
 					<td><canvas width="16" height="15"></canvas>
 					<br><button>L</button><button>R</button><button>U</button><button>D</button><button>B</button><button>A</button>
 					<br>
-					<br><button onclick="run()">RUN</button><button onclick="halt()">HALT</button><button>UPLOAD</button>
+					<br><button onclick="run()">run</button><button onclick="halt()">halt</button>
+					<br><input id="filename" value="app.bin" vlaue><button onclick="downloadBin()">save bin</button>
+					<br><input type="file" id="fileInput" accept=".bin" onchange="loadBin(event)">
 				</td>
 			</tr>
 			<tr>
