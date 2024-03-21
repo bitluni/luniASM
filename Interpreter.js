@@ -263,7 +263,7 @@ class Interpreter
 	{
 		let o = this.pop(); //offset
 		let v = this.pop(); //value
-		this.stack[this.stack.length - 1 - a] = v;
+		this.stack[this.stack.length - 1 - o] = v;
 	}
 
 	load()
