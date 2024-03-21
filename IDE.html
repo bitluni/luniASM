@@ -106,6 +106,23 @@
 				reader.readAsArrayBuffer(file);
 			}	
 
+			function copyToClipboard(text) 
+			{
+				const el = document.createElement('textarea');
+				el.value = text;
+				document.body.appendChild(el);
+				el.select();
+				document.execCommand('copy');
+				document.body.removeChild(el);
+			}			
+	
+			function toClipboard()
+			{
+				const code = compiler.compile(document.querySelector("textarea").value, console);
+      			const cArray = "const uint8_t code[] = {" + code.join(', ') + "};";
+      			copyToClipboard(cArray);
+			}
+
 		</script>
 		<style>
 			body
@@ -188,6 +205,7 @@ x:
 					<br><button onclick="run()">run</button><button onclick="halt()">halt</button>
 					<br><input id="filename" value="app.bin" vlaue><button onclick="downloadBin()">save bin</button>
 					<br><input type="file" id="fileInput" accept=".bin" onchange="loadBin(event)">
+					<br><button onclick="toClipboard()">clipboard</button>
 				</td>
 			</tr>
 			<tr>
