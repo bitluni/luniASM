@@ -17,7 +17,9 @@ class Compiler
 			34: "xor",
 			35: "not",
 			36: "inc",
-			37: "dec"
+			37: "dec",
+			38: "add",
+			39: "sub",
 		};
 	}
 	
@@ -183,6 +185,8 @@ class Interpreter
 			35: this.not,
 			36: this.inc,
 			37: this.dec,
+			38: this.add,
+			39: this.sub,
 		}
 	}
 
@@ -302,4 +306,17 @@ class Interpreter
 		this.push(v - 1);
 	}
 
+	add()
+	{
+		let b = this.pop();
+		let a = this.pop();
+		this.push(a + b);
+	}
+
+	sub()
+	{
+		let b = this.pop();
+		let a = this.pop();
+		this.push(a - b);
+	}
 };

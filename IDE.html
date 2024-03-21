@@ -109,30 +109,37 @@
 					<td rowspan="2"><textarea id="code" cols="80" rows="64">
 	push	0xa000		//store frame buffer address in mem[0]
 	push 	0x0000		
-	stor				
+	stor
 	push	15			//pushes 15 on stack (pixel rows)
-y:	
+y:
 	push 	16			//pushed 16 on stack (pixel cols)
-x:	
+x:
 	push 	0x0004		//load rgb value from mem[4]		
-	load	
+	load
 	push	0x0000		//load frame buffer address from mem[0]
 	load
 	stor				//write pixel
 	push	0x0000		//increment frame buffer address in mem[0]
-	load	
+	load
 	inc
-	push	0x0000		
+	push	0x0000
 	stor
-	push	0x0004		//increment rgb color in mem[4]
-	load	
-	inc
-	push	0x0004		
+	push	0x0004		//add 0x10 to rgb color in mem[4]
+	load
+	push	0x10
+	add
+	push	0x0004
 	stor
 	dec					//decrement x counter on top of stack
 	push	x			//pushes address of label x
 	jnz					//pops label address and jumps to label if value on top of stack is != 0
 	pop					//remove x counter
+	push	0x0004		//add 0x010000 to rgb color in mem[4]
+	load
+	push	0x100000
+	add
+	push	0x0004
+	stor
 	dec					//decrement y counter on top of stack
 	push	y			//pushes address of label y
 	jnz					//pops label address and jumps to label if value on top of stack is != 0
