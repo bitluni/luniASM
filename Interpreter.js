@@ -115,8 +115,9 @@ class Compiler
 			lines[i] = token;
 		} 
 		for(const label in labels)
-			for(let j = 0; j < labelInstances[label].length; j++)
-				this.writeInt(code, labelInstances[label][j][0], labels[label], labelInstances[label][j][1]);
+			if(labelInstances[label])
+				for(let j = 0; j < labelInstances[label].length; j++)
+					this.writeInt(code, labelInstances[label][j][0], labels[label], labelInstances[label][j][1]);
 		return new Uint8Array(code);
 	}
 
