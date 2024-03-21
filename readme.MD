@@ -7,7 +7,7 @@ open source interpreter for tiny game consoles
 because we can
 
 ## what?
-
+```
 push
 	pushes 1 value or label address to stack. 32 bit
 pop
@@ -70,7 +70,7 @@ neg
 	-st(0)
 abs
 	|st(0)|
-};
+```
 
 ## license
 
