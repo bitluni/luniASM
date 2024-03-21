@@ -1,41 +1,44 @@
+const Opcodes = {
+	0: "push",
+	1: "pop",
+	3: "stor",
+	2: "load",
+	4: "pushb",
+	5: "pushw",
+	6: "clone",
+	7: "loads",
+	8: "stors",
+
+	16: "jmp",
+	17: "jz",
+	18: "jnz",
+	19: "jg",
+	20: "jge",
+
+	32: "and",
+	33: "or",
+	34: "xor",
+	35: "not",
+	36: "inc",
+	37: "dec",
+	38: "add",
+	39: "sub",
+
+	40: "shl",
+	41: "shl",
+	42: "mul",
+	43: "div",
+	44: "mod",
+};
+
 class Compiler
 {
 	constructor(text)
 	{
-		this.opcodes = {
-			0: "push",
-			1: "pop",
-			2: "load",
-			3: "stor",
-
-			8: "jmp",
-			9: "jz",
-			10: "jnz",
-
-			32: "and",
-			33: "or",
-			34: "xor",
-			35: "not",
-			36: "inc",
-			37: "dec",
-			38: "add",
-			39: "sub",
-		};
-	}
-	
-	swap(json)
-	{
-		var ret = {};
-		for(var key in json)
-		{
-			ret[json[key]] = key;
-		}
-		return ret;
 	}
 
 	compile(text, console)
 	{
-		const opcodes = this.swap(this.opcodes);
 		const code = [];
 		const lines = text.split("\n");
 		const labels = {};
@@ -52,78 +55,72 @@ class Compiler
 			if(token[token.length - 1] == ':')
 			{
 				const label = token.substr(0, token.length - 1);
-				if(!isNaN(this.parseInt32(label)))
-				{
-					//already defined
+				if(!isNaN(this.parseInt(label)))
 					console.error("label can't be a number: " + label + " line " + i);
-				}
-
 				if(label in labels)
-				{
-					//already defined
-					console.error("label already defined " + token + " line " + i);
-				}
+					console.error("label already defined: " + token + " line " + i);
 				labels[label] = code.length;
 				line = line.substr(token.length).trim();
 				token = line.replace(/[\t| ].*/,'');
 			}
 			if(token.length)
 			{
-				if(token in opcodes)
+				const opcode = Object.keys(Opcodes).find(k=>Opcodes[k]===token);
+				if(opcode !== undefined)
 				{
-					this.appendInt8(code, opcodes[token]);
-					if(opcodes[token] == 0) //push
+					this.appendInt(code, opcode, 1);
+					if(token.startsWith("push")) //push
 					{
+						const bytes = (token == "pushb") ? 1 : token == "pushw" ? 2 : 4;
 						line = line.substr(token.length).trim();
 						token = line.replace(/[\t| ].*/,'');
-						const v = this.parseInt32(token);
-						if(isNaN(v))
+						let v = this.parseInt(token);
+						if(isNaN(v))	//label
 						{
-							//label
 							if(token in labelInstances)
-								labelInstances[token].push(code.length);
+								labelInstances[token].push([code.length, bytes]);
 							else
-								labelInstances[token] = [code.length];
-							this.appendInt32(code, 0);
+								labelInstances[token] = [[code.length, bytes]];
+							v = 0;
 						}
-						else
-							this.appendInt32(code, v);
+						this.appendInt(code, v, bytes);
 					}
 					line = line.substr(token.length).trim();
 					if(line.length)
-					{
-						//extra operands?
 						console.error("extra characters: " + line + " in line " + i);
-					}
 				}
 				else
-				{
-					//first token needs to be opcode, yet ( could be also data with implicit push
 					console.error("unknown opcode: " + token + " in line " + i);
-				}
 			}
 			lines[i] = token;
 		} 
 		for(const label in labels)
-			for(let j = 0; j < labelInstances[label]; j++)
-				this.writeInt32(code, labelInstances[label][j], labels[label]);
+			for(let j = 0; j < labelInstances[label].length; j++)
+				this.writeInt(code, labelInstances[label][j][0], labels[label], labelInstances[label][j][1]);
 		return new Uint8Array(code);
 	}
 
 	decompile(code)
 	{
 		let i = 0;
+		let text = "";
 		while(i < code.length)
 		{
-			const o = code[i++];
-			let line = this.opcodes[o];
-			if(o == 0)
-				line += " " + (code[i++] | (code[i++] << 8) | (code[i++] << 16) | (code[i++] << 24)).toString(16);
-			console.log(line);
+			const o = code[i];
+			let line = "0x" + ("000" + i.toString(16)).slice(-4) + "\t" + Opcodes[o];
+			i++;
+			if(Opcodes[o] == "push")
+				line += "\t0x" + (code[i++] | (code[i++] << 8) | (code[i++] << 16) | (code[i++] << 24)).toString(16);
+			else if(Opcodes[o] == "pushb")
+				line += "\t0x" + (code[i++]).toString(16);
+			else if(Opcodes[o] == "pushw")
+				line += "\t0x" + (code[i++] | (code[i++] << 8)).toString(16);
+			text += line + "\n";
 		}
+		return text;
 	}
 
-	parseInt32(t)
+	parseInt(t)
 	{
 		if(t.startsWith("0x"))
 			return parseInt(t.substr(2), 16)
@@ -132,62 +129,67 @@ class Compiler
 		return parseInt(t);
 	}
 
-	appendInt8(a, v)
+	appendInt(a, v, b = 4)
 	{
-		a.push(v);
+		for(let i = 0; i < b; i++)
+			a.push((v >> (i * 8)) & 255);
 	}
 
-	appendInt32(a, v)
+	writeInt(a, o, v, b = 4)
 	{
-		a.push(v & 255);
-		a.push((v >> 8) & 255);
-		a.push((v >> 16) & 255);
-		a.push((v >> 24) & 255);
+		for(let i = 0; i < b; i++)
+			a[o + i] = (v >> (i * 8)) & 255;
+	}
+};
+
+class MemoryMap
+{
+	constructor()
+	{
+		this.heap = new Int32Array(0x1000);
+		this.gfx = new Int32Array(0x1000);
+		this.io = new Int32Array(0x1000);
 	}
 
-	writeInt32(a, i, v)
+	store(a, v)
 	{
-		a[i] = v & 255;
-		a[i + 1] = (v >> 8) & 255;
-		a[i + 2] = (v >> 16) & 255;
-		a[i + 3] = (v >> 24) & 255;
+		switch(a & 0xf000)
+		{
+			case 0x0000:
+				this.heap[a & 0xfff] = v;
+				break;
+			case 0xa000:
+				this.gfx[a & 0xfff] = v;
+				break;
+			case 0xf000:
+				this.io[a & 0xfff] = v;
+				break;
+		}
+	}
+
+	load(a)
+	{
+		switch(a & 0xf000)
+		{
+			case 0x0000:
+				return this.heap[a & 0xfff];
+			case 0xa000:
+				return this.gfx[a & 0xfff];
+			case 0xf000:
+				return this.io[a & 0xfff];
+		}		
+		return 0;
 	}
 };
 
 class Interpreter
 {
-	constructor(code, framebuffer = 0)
+	constructor(code, memoryMap)
 	{
-		//TODO memory map
-		//  code structure
-		//	[op] 
-		//	[push] [byte] [byte] [byte] [byte] 
-		//	labels are byte offsets
-		this.halted = false;
 		this.IP = 0;
-		this.flags = 0;
 		this.stack = [];
-		this.heap = new Int32Array(0x1000);
-		this.code = code;	//uint8array
-		this.opcodes = {
-			0: this.push,
-			1: this.pop,
-			2: this.load,
-			3: this.stor,
-
-			8: this.jmp,
-			9: this.jz,
-			10: this.jnz,
-
-			32: this.and,
-			33: this.or,
-			34: this.xor,
-			35: this.not,
-			36: this.inc,
-			37: this.dec,
-			38: this.add,
-			39: this.sub,
-		}
+		this.code = code;
+		this.mem = memoryMap;
 	}
 
 	execute()
@@ -199,17 +201,15 @@ class Interpreter
 		}
 
 		let op = this.code[this.IP++];
-		//console.log(this.opcodes[op].name + " " + op + " " + (this.IP-1));
-		if (this.opcodes[op] == this.push)
-		{
-			let v = this.code[this.IP++] | 
-				(this.code[this.IP++] << 8) |
-				(this.code[this.IP++] << 16) |
-				(this.code[this.IP++] << 24);
-			this.push(v);
-		}
+		//console.log(("000" + (this.IP-1)).slice(-4) + "\t" + Opcodes[op] + "\t[" + this.stack.at(-1) + " ," + this.stack.at(-2) + " ," + this.stack.at(-3) + " ,..]");
+		if (Opcodes[op] == "push")
+			this.push(this.code[this.IP++] | (this.code[this.IP++] << 8) | (this.code[this.IP++] << 16) | (this.code[this.IP++] << 24));
+		else if (Opcodes[op] == "pushb")
+			this.push(this.code[this.IP++]);
+		else if (Opcodes[op] == "pushw")
+			this.push(this.code[this.IP++] | (this.code[this.IP++] << 8));
 		else 
-			this.opcodes[op].call(this);
+			this[Opcodes[op]].call(this);
 	}
 
 	push(v)
@@ -222,24 +222,35 @@ class Interpreter
 		return this.stack.pop();
 	}
 
+	clone()
+	{
+		this.push(this.stack.at(-1));
+	}
+
 	stor()
 	{
 		//on stack address, value
 		let a = this.pop();
 		let v = this.pop();
-		if(a < 0x1000)
-			this.heap[a] = v;
-		else
-			if(a >= 0xA000 && a < 0xB000)
-			{
-				if(framebuffer)
-					framebuffer(a - 0xA000, v);
-			}
+		this.mem.store(a, v);
+	}
+
+	loads()
+	{
+		this.push(this.stack.at(-this.pop()));
+	}
+
+	stors()
+	{
+		//on stack address, value
+		let a = this.pop();
+		let v = this.pop();
+		this.mem.store(a, v);
 	}
 
 	load()
 	{
-		this.push(this.heap[this.pop()]);
+		this.push(this.mem.load(this.pop()));
 	}
 
 	jmp()
@@ -252,7 +263,6 @@ class Interpreter
 	{
 		let a = this.pop();
 		let v = this.pop();
-		this.push(v);
 		if(v === 0) 
 			this.IP = a;
 	}
@@ -261,8 +271,25 @@ class Interpreter
 	{
 		let a = this.pop();
 		let v = this.pop();
-		this.push(v);
 		if(v !== 0) 
+			this.IP = a;
+	}
+
+	jg()
+	{
+		let b = this.pop();
+		let a = this.pop();
+		let v = this.pop();
+		if(a > b) 
+			this.IP = a;
+	}
+
+	jge()
+	{
+		let b = this.pop();
+		let a = this.pop();
+		let v = this.pop();
+		if(a >= b) 
 			this.IP = a;
 	}
 
@@ -318,5 +345,40 @@ class Interpreter
 		let b = this.pop();
 		let a = this.pop();
 		this.push(a - b);
+	}
+
+	shr()
+	{
+		let b = this.pop();
+		let a = this.pop();
+		this.push(a >> b);
+	}
+
+	shl()
+	{
+		let b = this.pop();
+		let a = this.pop();
+		this.push(a << b);
+	}	
+
+	mul()
+	{
+		let b = this.pop();
+		let a = this.pop();
+		this.push(a * b);
+	}
+
+	div()
+	{
+		let b = this.pop();
+		let a = this.pop();
+		this.push(Math.floor(a / b));
+	}
+
+	mod()
+	{
+		let b = this.pop();
+		let a = this.pop();
+		this.push(a % b);
 	}
 };

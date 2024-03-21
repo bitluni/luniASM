@@ -17,8 +17,16 @@
 					for(let i = 0; i < 1024; i++)
 						interpreter.execute();
 				//draw frame
+				show();
 				ctx.putImageData(imageData, 0, 0);
 				requestAnimationFrame(loop);
+			}
+
+			function show()
+			{
+				if(!interpreter) return;
+				for(let i = 0; i < xres * yres * 4; i++)
+					imageData.data[i] = (i & 3) == 3 ? 255 : interpreter.mem.gfx[i >> 2] >> (8 * (i & 3)) & 0xff;
 			}
 
 			function pix(x, y, rgb)
@@ -62,8 +70,8 @@
 			function run()
 			{
 				const code = compiler.compile(document.querySelector("textarea").value, console);
-				compiler.decompile(code);
-				interpreter = new Interpreter(code, framebuffer);
+				console.log(compiler.decompile(code));
+				interpreter = new Interpreter(code, new MemoryMap());
 			}
 
 			function halt()
@@ -131,6 +139,7 @@ x:
 	push	0x0004
 	stor
 	dec					//decrement x counter on top of stack
+	clone				//clone x counter for comparison
 	push	x			//pushes address of label x
 	jnz					//pops label address and jumps to label if value on top of stack is != 0
 	pop					//remove x counter
@@ -141,6 +150,7 @@ x:
 	push	0x0004
 	stor
 	dec					//decrement y counter on top of stack
+	clone				//clone y counter for comparison
 	push	y			//pushes address of label y
 	jnz					//pops label address and jumps to label if value on top of stack is != 0
 	pop					//pop clear y counter
