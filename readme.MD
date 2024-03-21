@@ -7,6 +7,8 @@ open source interpreter for tiny game consoles
 because we can
 
 ## what?
+
+# opcodes
 ```
 push
 	pushes 1 value or label address to stack. 32 bit
@@ -131,6 +133,38 @@ neg
 	-st(0)
 abs
 	|st(0)|
+```
+
+# hardware addresses
+
+```
+0x0000 heap
+
+0xa000 gfx frame buffer
+0xe000 flash storage
+0xf000 hardware
+	0x000 system
+		0x00 clock cycles (one opcode per clock)
+		0x04 clocks per second (setting)
+		0x10 xres
+		0x14 yres
+	0x100 io pins
+		0x00 up
+		0x04 down
+		0x08 left
+		0x0c right
+		0x10 a
+		0x14 b
+		0x80 LDR range [0..255] (optional)
+	0x800 sound
+		0x00 square wave hz / 16
+		0x04 square wave amplitude (255 max)
+		0x10 sine wave hz / 16
+		0x14 sine wave amplitude (255 max)
+		0x20 triangle wave hz / 16
+		0x24 triangle wave amplitude (255 max)
+		0x30 reserved
+		0x34 noise aplitude (255 max)
 ```
 
 ## license
