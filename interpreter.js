@@ -14,6 +14,8 @@ const Opcodes = {
 	18: "jnz",
 	19: "jg",
 	20: "jge",
+	21: "je",
+	22: "jne",
 
 	32: "and",
 	33: "or",
@@ -29,6 +31,8 @@ const Opcodes = {
 	42: "mul",
 	43: "div",
 	44: "mod",
+	45: "neg",
+	46: "abs",
 };
 
 class Compiler
@@ -275,21 +279,39 @@ class Interpreter
 
 	jg()
 	{
-		let b = this.pop();
 		let a = this.pop();
-		let v = this.pop();
-		if(a > b) 
+		let v2 = this.pop();
+		let v1 = this.pop();
+		if(v1 > v2) 
 			this.IP = a;
 	}
 
 	jge()
 	{
-		let b = this.pop();
 		let a = this.pop();
-		let v = this.pop();
-		if(a >= b) 
+		let v2 = this.pop();
+		let v1 = this.pop();
+		if(v1 >= v2) 
 			this.IP = a;
 	}
+
+	je()
+	{
+		let a = this.pop();
+		let v2 = this.pop();
+		let v1 = this.pop();
+		if(v1 == v2) 
+			this.IP = a;
+	}
+
+	jne()
+	{
+		let a = this.pop();
+		let v2 = this.pop();
+		let v1 = this.pop();
+		if(v1 != v2) 
+			this.IP = a;
+	}	
 
 //ALU
 	and()
