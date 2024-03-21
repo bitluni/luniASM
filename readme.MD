@@ -1,14 +1,14 @@
-## what?
+# what?
 
 open source interpreter for tiny game consoles
 
-## why ?
+# why ?
 
 because we can
 
-## what?
+# what?
 
-# opcodes
+## opcodes
 ```
 push
 	pushes 1 value or label address to stack. 32 bit
@@ -135,7 +135,7 @@ abs
 	|st(0)|
 ```
 
-# hardware addresses
+## hardware addresses
 
 ```
 0x0000 heap
@@ -167,7 +167,7 @@ abs
 		0x34 noise aplitude (255 max)
 ```
 
-## license
+# license
 
 take it and run 1.0
 
