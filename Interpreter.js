@@ -27,7 +27,7 @@ const Opcodes = {
 	39: "sub",
 
 	40: "shl",
-	41: "shl",
+	41: "shr",
 	42: "mul",
 	43: "div",
 	44: "mod",
