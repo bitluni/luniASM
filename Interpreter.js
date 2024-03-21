@@ -41,7 +41,7 @@ class Compiler
 	{
 	}
 
-	compile(text, console)
+	compile(text, console, optimize = true)
 	{
 		const code = [];
 		const lines = text.split("\n");
@@ -69,26 +69,42 @@ class Compiler
 			}
 			if(token.length)
 			{
-				const opcode = Object.keys(Opcodes).find(k=>Opcodes[k]===token);
+				let opcode = Object.keys(Opcodes).find(k=>Opcodes[k]===token);
 				if(opcode !== undefined)
 				{
-					this.appendInt(code, opcode, 1);
 					if(token.startsWith("push")) //push
 					{
-						const bytes = (token == "pushb") ? 1 : token == "pushw" ? 2 : 4;
+						let bytes = (token == "pushb") ? 1 : token == "pushw" ? 2 : 4;
 						line = line.substr(token.length).trim();
 						token = line.replace(/[\t| ].*/,'');
 						let v = this.parseInt(token);
-						if(isNaN(v))	//label
+						let isLabel = isNaN(v);
+						if(isLabel) v = 0;
+						if(optimize && !isLabel)
+						{
+							if(v < 256)
+							{
+								opcode = Object.keys(Opcodes).find(k=>Opcodes[k]==="pushb");
+								bytes = 1;
+							}
+							else if(v < 0x10000)
+							{
+								opcode = Object.keys(Opcodes).find(k=>Opcodes[k]==="pushw");
+								bytes = 2;
+							}
+						}
+						this.appendInt(code, opcode, 1);
+						if(isLabel)
 						{
 							if(token in labelInstances)
 								labelInstances[token].push([code.length, bytes]);
 							else
 								labelInstances[token] = [[code.length, bytes]];
-							v = 0;
 						}
 						this.appendInt(code, v, bytes);
 					}
+					else
+						this.appendInt(code, opcode, 1);
 					line = line.substr(token.length).trim();
 					if(line.length)
 						console.error("extra characters: " + line + " in line " + i);
