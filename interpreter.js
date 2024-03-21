@@ -229,9 +229,8 @@ class Interpreter
 
 	stor()
 	{
-		//on stack address, value
-		let a = this.pop();
-		let v = this.pop();
+		let a = this.pop();	//address
+		let v = this.pop();	//value
 		this.mem.store(a, v);
 	}
 
@@ -242,10 +241,9 @@ class Interpreter
 
 	stors()
 	{
-		//on stack address, value
-		let a = this.pop();
-		let v = this.pop();
-		this.mem.store(a, v);
+		let o = this.pop(); //offset
+		let v = this.pop(); //value
+		this.stack[this.stack.length - 1 - a] = v;
 	}
 
 	load()
