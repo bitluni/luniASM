@@ -14,8 +14,23 @@ pop
 	removes 1 value from stack
 stor
 	stores st(1) to mem[st(0)]. removes 2 values from stack
+
+	//write 69 to memory address 0x1000 and clear the stack
+	push 69
+	push 0x1000
+	stor
+
 load
 	loads value from memory mem[st(0)] to stack. removes 1 address from stack. pushes 1 value to stack
+
+	//loads value from memory address 0x1000 checks if its 69 if yes jumps to nice. 
+	//stack is clean afterwards
+	push 0x1000
+	load
+	push 69
+	push nice
+	je
+
 pushb
 	pushes 1 value or label address to stack. 8 bit	(size coding)
 pushw
@@ -24,17 +39,50 @@ clone
 	clones the top value on stack. 
 loads
 	loads value from stack with offset and pushes it to the top of the stack (extension)
+
+	//copy value from stack index 1 (after removing the 1 from the stack)
+	push 69
+	push 42
+	push 1
+	loads
+	pop //69
+	pop //42
+	pop //69
+
 stors
 	stores a value st(1) to the stack with offset st(st(0)) (extension)
+
+	//overwrite 0 with the value 69 on the stack
+	push 0
+	push 42
+	push 69
+	push 1
+	stors
+	pop //42
+	pop //69
+
 jmp
 	jumps to address st(0). address is removed from stack
 jz
 	jumps to address st(0) if s(1) is zero. 2 values are removed from stack
+
+	//jumps to label zero. stack is cleared
+	push 0
+	push zero
+	jz
+
 jnz
 	jumps to address st(0) if s(1) is not zero. 2 values are removed from stack
-jz
+jg
 	jumps to address st(0) if s(2) > st(1). 3 values are removed from stack
-jnz
+
+	//copares 2 > 1 and then jumps to label. stack is cleared
+	push 2
+	push 1
+	push yeah2isGreaterThan1
+	jg
+
+jge
 	jumps to address st(0) if s(2) >= st(1). 3 values are removed from stack
 je
 	jumps to address st(0) if s(2) == st(1). 3 values are removed from stack
@@ -48,12 +96,25 @@ xor
 	st(1) ^ st(0). 2 values popped result pushed
 not
 	~st(0). 2 values popped result pushed
+
+	//invert the top of the stack
+	push 0x00000000
+	neg
+	pop //0xffffffff
+
 inc
 	st(0)++
 dec
 	st(1)--
 add
 	st(1) + st(0). 2 values popped result pushed
+
+	//adds 2 and 3
+	push 2
+	push 3
+	add
+	pop //5
+
 sub
 	st(1) - st(0). 2 values popped result pushed
 shl
