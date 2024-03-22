@@ -63,6 +63,9 @@ stors
 	pop //42
 	pop //69
 
+swap
+	swaps the two top stack values
+
 jmp
 	jumps to address st(0). address is removed from stack
 jz
