@@ -26,7 +26,7 @@
 			{
 				if(!interpreter) return;
 				for(let i = 0; i < xres * yres * 4; i++)
-					imageData.data[i] = (i & 3) == 3 ? 255 : interpreter.mem.gfx[i >> 2] >> (8 * (i & 3)) & 0xff;
+					imageData.data[i] = (i & 3) == 3 ? 255 : interpreter.mem.gfx[i];
 			}
 
 			function init()
@@ -173,7 +173,8 @@ x:
 	stor				//write pixel
 	push	0x0000		//increment frame buffer address in mem[0]
 	load
-	inc
+	push 	4
+	add
 	push	0x0000
 	stor
 	push	0x0004		//add 0x10 to rgb color in mem[4]

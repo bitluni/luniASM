@@ -167,9 +167,23 @@ class MemoryMap
 {
 	constructor()
 	{
-		this.heap = new Int32Array(0x1000);
-		this.gfx = new Int32Array(0x1000);
-		this.io = new Int32Array(0x1000);
+		this.heap = new Uint8Array(0x1000);
+		this.gfx = new Uint8Array(0x1000);
+		this.io = new Uint8Array(0x1000);
+	}
+
+	writeInt(a, o, v, b = 4)
+	{
+		for(let i = 0; i < b; i++)
+			a[o + i] = (v >> (i * 8)) & 255;
+	}
+
+	readInt(a, o, b)
+	{
+		let v = 0;
+		for(let i = 0; i < b; i++)
+			v |= a[o + i] << (i * 8);
+		return v;
 	}
 
 	store(a, v)
@@ -177,13 +191,13 @@ class MemoryMap
 		switch(a & 0xf000)
 		{
 			case 0x0000:
-				this.heap[a & 0xfff] = v;
+				this.writeInt(this.heap, a & 0xfff, v, 4);
 				break;
 			case 0xa000:
-				this.gfx[a & 0xfff] = v;
+				this.writeInt(this.gfx, a & 0xfff, v, 4);
 				break;
 			case 0xf000:
-				this.io[a & 0xfff] = v;
+				this.writeInt(this.io, a & 0xfff, v, 4);
 				break;
 		}
 	}
@@ -193,11 +207,11 @@ class MemoryMap
 		switch(a & 0xf000)
 		{
 			case 0x0000:
-				return this.heap[a & 0xfff];
+				return this.readInt(this.heap, a & 0xfff, 4);
 			case 0xa000:
-				return this.gfx[a & 0xfff];
+				return this.readInt(this.gfx, a & 0xfff, 4);
 			case 0xf000:
-				return this.io[a & 0xfff];
+				return this.readInt(this.io, a & 0xfff, 4);
 		}		
 		return 0;
 	}
