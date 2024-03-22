@@ -8,6 +8,7 @@ const Opcodes = {
 	6: "clone",
 	7: "loads",
 	8: "stors",
+	9: "swap",
 
 	16: "jmp",
 	17: "jz",
@@ -284,6 +285,14 @@ class Interpreter
 	load()
 	{
 		this.push(this.mem.load(this.pop()));
+	}
+
+	swap()
+	{
+		let a = this.pop();
+		let b = this.pop();
+		this.push(a);
+		this.push(b);
 	}
 
 	jmp()
