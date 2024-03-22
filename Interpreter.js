@@ -271,7 +271,7 @@ class Interpreter
 
 	loads()
 	{
-		this.push(this.stack.at(-this.pop()));
+		this.push(this.stack.at(-this.pop() - 1));
 	}
 
 	stors()
