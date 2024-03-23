@@ -223,12 +223,13 @@ class MemoryMap
 
 class Interpreter
 {
-	constructor(code, memoryMap)
+	constructor(code, memoryMap, debugLevel = 0)
 	{
 		this.IP = 0;
 		this.stack = [];
 		this.code = code;
 		this.mem = memoryMap;
+		this.debugLevel = debugLevel;
 	}
 
 	execute()
@@ -240,7 +241,8 @@ class Interpreter
 		}
 
 		let op = this.code[this.IP++];
-		//console.log(("000" + (this.IP-1)).slice(-4) + "\t" + Opcodes[op] + "\t[" + this.stack.at(-1) + " ," + this.stack.at(-2) + " ," + this.stack.at(-3) + " ,..]");
+		if(this.debugLevel == 3)
+			console.log("0x" + ("000" + (this.IP-1).toString(16)).slice(-4) + "\t" + Opcodes[op] + "\t[" + this.stack.at(-1) + " ," + this.stack.at(-2) + " ," + this.stack.at(-3) + " ,..]");
 		if (Opcodes[op] == "push")
 			this.push(this.code[this.IP++] | (this.code[this.IP++] << 8) | (this.code[this.IP++] << 16) | (this.code[this.IP++] << 24));
 		else if (Opcodes[op] == "pushb")
@@ -258,6 +260,8 @@ class Interpreter
 
 	pop()
 	{
+		if(this.stack.length == 0 && this.debugLevel == 1)
+			console.log("0x" + ("000" + (this.IP-1).toString(16)).slice(-4) + "\t pop on empty stack");
 		return this.stack.pop();
 	}
 

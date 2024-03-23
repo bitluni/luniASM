@@ -162,7 +162,6 @@ caseEnd:
 	push pixelLoop
 	jnz
 	pop
-	pop
 
 	push afterCopy
 	push copyBuffer
