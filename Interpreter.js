@@ -459,7 +459,7 @@ class Interpreter
 
 	debug()
 	{
-		console.log(this.stack);
+		console.log(this.stack.toReversed());
 		//debugger;
 	}
 
