@@ -136,6 +136,11 @@ neg
 	-st(0)
 abs
 	|st(0)|
+
+debug
+	breakpoint
+nop
+	do nothing
 ```
 
 ## hardware addresses

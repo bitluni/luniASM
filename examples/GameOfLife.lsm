@@ -1,0 +1,268 @@
+	push main
+	push initGame
+jmp
+main:
+	push 256
+pixelLoop:
+	push 0  //neighbor count
+
+	push 1	//clone loop counter
+	loads
+	dec		
+	push 2	
+	shl		//stack[source,neigh,counter,
+	clone	//stack[source,source,neigh,counter,
+	push 0x400
+	add		//stack[target,source,neigh,counter
+	swap	//stack[source,target,neigh,counter
+
+//start counting neighbors
+
+	push	64		//upper left
+	sub
+	push	0x3ff	//boundaries
+	and
+	push 	pix0
+	push	incIfSet
+	jmp
+pix0:
+
+	push 	128
+	add
+	push	0x3ff	//boundaries
+	and
+	push 	pix1
+	push	incIfSet
+	jmp
+pix1:
+
+	clone			//move to the left and wrap around
+	push	0b1111000000
+	and
+	swap
+	push	4
+	sub
+	push	0b0000111111
+	and
+	or
+
+	push 	128
+	sub
+	push	0b1111111111 //boundaries
+	and
+	push 	pix2
+	push	incIfSet
+	jmp
+pix2:
+
+	push 	64
+	add
+	push	0b1111111111 //boundaries
+	and
+	push 	pix3
+	push	incIfSet
+	jmp
+pix3:
+
+	push 	64
+	add
+	push	0b1111111111 //boundaries
+	and
+	push 	pix4
+	push	incIfSet
+	jmp
+pix4:
+
+	clone			//move to the right and wrap around
+	push	0b1111000000
+	and
+	swap
+	push	8
+	add
+	push	0b0000111111
+	and
+	or
+
+	push 	128
+	sub
+	push	0b1111111111 //boundaries
+	and
+	push 	pix5
+	push	incIfSet
+	jmp
+pix5:
+	
+	push 64
+	add
+	push	0b1111111111 //boundaries
+	and
+	push 	pix6
+	push	incIfSet
+	jmp
+pix6:
+
+	push 64
+	add
+	push	0b1111111111 //boundaries
+	and
+	push 	pix7
+	push	incIfSet
+	jmp
+pix7:
+
+	clone			//move to the left and wrap around
+	push	0b1111000000
+	and
+	swap
+	push	4
+	sub
+	push	0b0000111111
+	and
+	or
+
+	push 64
+	sub
+	load	//stack[center,target,neigh,counter
+	push 2
+	loads	//stack[neigh,center,target,neigh,counter,
+
+//game die [0,1,4,5,6,7,8] keep [2] spawn [3]
+
+	push 3		//if 3 neighbors spawn
+	push spawn
+	je
+
+	push 2
+	loads	//stack[neigh,target,neigh,counter,
+	push 2		//if 2 neighbors keep
+	push keep
+	je
+die:
+	pop
+	push 0	//[0,target,neigh,counter
+	swap	//[target,0,neigh,counter
+	stor	//[target,neigh,counter
+	push caseEnd
+	jmp
+keep:
+	swap	//[target,center,counter
+	stor	//[counter
+	push caseEnd
+	jmp
+spawn:
+	pop
+	push 1
+	swap	//[target,1,counter
+	stor	//[target,counter
+caseEnd:
+
+	pop		//neighbor count
+
+	dec
+	clone
+	push pixelLoop
+	jnz
+	pop
+	pop
+
+	push afterCopy
+	push copyBuffer
+	jmp
+afterCopy:
+
+	push afterShow
+	push showBuffer
+	jmp
+afterShow:
+
+	push main
+	jmp
+
+
+incIfSet:		//[ret,source,target,neigh 
+	push 1
+	loads		//[source,ret,source,target,neigh 
+	load		//[val,ret,source,target,neigh 
+	push inactiveCell
+	jz
+	push 3
+	loads
+	inc
+	push 3
+	stors
+inactiveCell:
+	jmp
+
+copyBuffer:
+	push 256
+	copyLoop:
+
+	clone	//clone loop counter
+	dec		
+	push 2	
+	shl		//stack[targetaddr,counter,
+	clone
+	push 0x400
+	add		//stack[sourcearrd,targetaddr,counter,
+	load	//stack[value,targetaddr,counter
+	swap	//stack[targetaddr,value,counter
+	stor	//stack[counter
+
+	dec
+	clone
+	push copyLoop
+	jnz
+	pop
+	jmp
+
+
+showBuffer:
+	push 0xa000		//frame address (used with loads and stors, local var)
+	push 256
+showLoop:
+	push 0xffffff	//color
+
+	push 2			//stackoffset
+	loads			//load address (offset 2)
+	clone
+	push 4
+	add
+	push 3
+	stors
+	clone			//clone gfx address
+	push 0x3ff		//change to buffer in 0x0000
+	and	
+	load
+	push pixelSet
+	jnz
+	push 0
+	push 1
+	stors
+pixelSet:
+	stor
+
+	dec
+	clone
+	push showLoop
+	jnz
+	pop
+	pop
+	jmp
+
+initGame:
+	push 1
+	push 0x0024
+	stor
+	push 1
+	push 0x0068
+	stor
+	push 1
+	push 0x00a0
+	stor
+	push 1
+	push 0x00a4
+	stor
+	push 1
+	push 0x00a8
+	stor
+	jmp

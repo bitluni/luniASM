@@ -34,6 +34,9 @@ const Opcodes = {
 	44: "mod",
 	45: "neg",
 	46: "abs",
+
+	254: "debug",
+	255: "nop"
 };
 
 class Compiler
@@ -453,4 +456,14 @@ class Interpreter
 		let v = this.pop();
 		this.push(v < 0 ? -v : v);
 	}	
+
+	debug()
+	{
+		console.log(this.stack);
+		//debugger;
+	}
+
+	nop()
+	{
+	}
 };

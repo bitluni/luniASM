@@ -90,11 +90,18 @@
 			{
 				const code = compiler.compile(document.querySelector("textarea").value, console);
 				if(code)
-					downloadFile(document.querySelector("#filename").value, code);
+					downloadFile(document.querySelector("#filename").value + ".bin", code);
 			}
+
+			function downloadLsm()
+			{
+				const code = document.querySelector("textarea").value;
+				downloadFile(document.querySelector("#filename").value + ".lsm", code);
+			}			
 
 			function loadBin(event)
 			{
+				if(!event.target.files.length) return;
 				const file = event.target.files[0];
 				const reader = new FileReader();
 				reader.onload = function(e) 
@@ -106,6 +113,19 @@
 				reader.readAsArrayBuffer(file);
 			}	
 
+			function loadLsm(event)
+			{
+				if(!event.target.files.length) return;
+				const file = event.target.files[0];
+				const reader = new FileReader();
+				reader.onload = function(e) 
+				{
+					const code = e.target.result;
+					document.querySelector("textarea").value = code;
+				}
+				reader.readAsText(file);
+				document.querySelector("#filename").value = file.name.replace(/\.[^/.]+$/, "");
+			}				
 			function copyToClipboard(text) 
 			{
 				const el = document.createElement('textarea');
@@ -119,7 +139,7 @@
 			function toClipboard()
 			{
 				const code = compiler.compile(document.querySelector("textarea").value, console);
-      			const cArray = "const uint8_t code[] = {" + code.join(', ') + "};";
+      			const cArray = "const uint8_t code[] = {" + code.join(', ') + "};\n";
       			copyToClipboard(cArray);
 			}
 
@@ -128,6 +148,8 @@
 			body
 			{
 				background-color: #222;
+				font-family: sans-serif;
+				color: #ddd;
 			}
 			canvas
 			{
@@ -152,6 +174,10 @@
 			td
 			{
 				vertical-align: top;
+			}
+			input[type=text]
+			{
+				width: 100px;
 			}
 		</style>
 	</head>
@@ -204,9 +230,12 @@ x:
 					<br><button>L</button><button>R</button><button>U</button><button>D</button><button>B</button><button>A</button>
 					<br>
 					<br><button onclick="run()">run</button><button onclick="halt()">halt</button>
-					<br><input id="filename" value="app.bin" vlaue><button onclick="downloadBin()">save bin</button>
-					<br><input type="file" id="fileInput" accept=".bin" onchange="loadBin(event)">
-					<br><button onclick="toClipboard()">clipboard</button>
+					<br><br>App name: <input id="filename" value="app" type="text">
+					<br><button onclick="document.querySelector('#loadLsm').click()">load lsm<input type="file" id="loadLsm" accept=".lsm" style="display:none" onchange="loadLsm(event)"></button>
+					<button onclick="downloadLsm()">save lsm</button>
+					<br><button onclick="document.querySelector('#loadBin').click()">load bin<input type="file" id="loadBin" accept=".bin" style="display:none" onchange="loadBin(event)"></button>
+					<button onclick="downloadBin()">save bin</button>
+					<br><button onclick="toClipboard()">c++ array to clipboard</button>
 				</td>
 			</tr>
 			<tr>
