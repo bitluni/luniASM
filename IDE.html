@@ -32,9 +32,7 @@
 			function init()
 			{
 				const textarea = document.querySelector('textarea');
-				const code = restoreCode();
-				if(code)
-					textarea.value = code;
+				restoreCode();
 				textarea.onkeydown = function(e)
 				{
 					if(e.keyCode==9 || e.which==9)
@@ -69,9 +67,20 @@
 			{
 				localStorage.setItem("code", code);
 			}
+
+			function storeFileName(fileName)
+			{
+				localStorage.setItem("fileName", fileName);
+			}
+
 			function restoreCode()
 			{
-				return localStorage.getItem("code");
+				const code = localStorage.getItem("code");
+				if(code)
+					document.querySelector('textarea').value = code;
+				const fileName = localStorage.getItem("fileName");
+				if(fileName)
+					document.querySelector('#filename').value = fileName;
 			}
 
 			function downloadFile(fileName, data) 
@@ -124,7 +133,9 @@
 					document.querySelector("textarea").value = code;
 				}
 				reader.readAsText(file);
-				document.querySelector("#filename").value = file.name.replace(/\.[^/.]+$/, "");
+				const fileName = file.name.replace(/\.[^/.]+$/, "");
+				document.querySelector("#filename").value = fileName;
+				storeFileName(fileName);
 			}				
 			function copyToClipboard(text) 
 			{
@@ -230,7 +241,7 @@ x:
 					<br><button>L</button><button>R</button><button>U</button><button>D</button><button>B</button><button>A</button>
 					<br>
 					<br><button onclick="run()">run</button><button onclick="halt()">halt</button>
-					<br><br>App name: <input id="filename" value="app" type="text">
+					<br><br>App name: <input id="filename" value="app" type="text" onchange="storeFileName(this.value)">
 					<br><button onclick="document.querySelector('#loadLsm').click()">load lsm<input type="file" id="loadLsm" accept=".lsm" style="display:none" onchange="loadLsm(event)"></button>
 					<button onclick="downloadLsm()">save lsm</button>
 					<br><button onclick="document.querySelector('#loadBin').click()">load bin<input type="file" id="loadBin" accept=".bin" style="display:none" onchange="loadBin(event)"></button>
