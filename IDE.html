@@ -14,7 +14,7 @@
 			function loop()
 			{
 				if(interpreter)
-					for(let i = 0; i < 1024; i++)
+					for(let i = 0; i < 1024 * 4; i++)
 						interpreter.execute();
 				//draw frame
 				show();
@@ -131,6 +131,7 @@
 				{
 					const code = e.target.result;
 					document.querySelector("textarea").value = code;
+					storeCode(code);
 				}
 				reader.readAsText(file);
 				const fileName = file.name.replace(/\.[^/.]+$/, "");
