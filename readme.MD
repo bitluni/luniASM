@@ -8,6 +8,18 @@ because we can
 
 # what?
 
+## Run the JS IDE locally
+
+```sh
+# If you have python3 installed
+python3 -m http.server 8080
+
+# If you have node installed
+npx http-server -p 8080
+
+open http://localhost:8080
+```
+
 ## opcodes
 ```
 push
@@ -178,4 +190,3 @@ nop
 # license
 
 take it and run 1.0
-
