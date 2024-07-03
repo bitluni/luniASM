@@ -168,7 +168,8 @@
 			function toClipboardBase64()
 			{
 				const code = compiler.compile(document.querySelector("textarea").value, console);
-      			copyToClipboard(btoa(code));
+				var decoder = new TextDecoder('ascii');
+      			copyToClipboard(btoa(decoder.decode(code)));
 			}
 
 		</script>
