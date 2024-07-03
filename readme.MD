@@ -110,7 +110,7 @@ not
 inc
 	st(0)++
 dec
-	st(1)--
+	st(0)--
 add
 	st(1) + st(0). 2 values popped result pushed
 
