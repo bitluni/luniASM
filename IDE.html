@@ -164,11 +164,26 @@
       			const cArray = "const uint8_t code[] = {" + code.join(', ') + "};\n";
       			copyToClipboard(cArray);
 			}
+/*
+			function bytes2base64(b)
+			{
+				let r = "";
+				var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+				(b.length * 8 + 7) / 6;
+				let rem = 0;
+				let remBits = 0;
+				
+				for(let i = 0; i < b.length; i++)
+				{
+					
+				}
+			}*/
 
 			function toClipboardBase64()
 			{
 				const code = compiler.compile(document.querySelector("textarea").value, console);
-      			copyToClipboard(btoa(code));
+				var decoder = new TextDecoder('ascii');
+      			copyToClipboard(btoa(decoder.decode(code)));
 			}
 
 		</script>
