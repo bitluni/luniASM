@@ -169,12 +169,12 @@ class Compiler
 
 class MemoryMap
 {
-	constructor()
+	constructor(heap, gfx, io)
 	{
-		this.heap = new Uint8Array(0x1000);
-		this.gfx = new Uint8Array(0x1000);
-		this.io = new Uint8Array(0x1000);
-	}
+		this.heap = heap || (new Uint8Array(0x1000));
+		this.gfx = gfx || (new Uint8Array(0x4000));
+		this.io = io || (new Uint8Array(0x1000));
+	}	
 
 	writeInt(a, o, v, b = 4)
 	{
@@ -198,7 +198,13 @@ class MemoryMap
 				this.writeInt(this.heap, a & 0xfff, v, 4);
 				break;
 			case 0xa000:
-				this.writeInt(this.gfx, a & 0xfff, v, 4);
+			case 0xb000:
+			case 0xc000:
+			case 0xd000:
+				this.writeInt(this.gfx, (a - 0xa000) & 0x3fff, v, 4);
+				break;
+			case 0xe000:
+				//flash
 				break;
 			case 0xf000:
 				this.writeInt(this.io, a & 0xfff, v, 4);
@@ -213,7 +219,13 @@ class MemoryMap
 			case 0x0000:
 				return this.readInt(this.heap, a & 0xfff, 4);
 			case 0xa000:
-				return this.readInt(this.gfx, a & 0xfff, 4);
+			case 0xb000:
+			case 0xc000:
+			case 0xd000:				
+				return this.readInt(this.gfx, (a - 0xa000) & 0x3fff, 4);
+			case 0xe000:
+				//flash
+				return 0;
 			case 0xf000:
 				return this.readInt(this.io, a & 0xfff, 4);
 		}		
@@ -470,4 +482,27 @@ class Interpreter
 	nop()
 	{
 	}
+
+    serialize() {
+        return {
+            "IP": this.IP,
+            "stack": this.stack,
+            "code": this.code,
+            "mem": {
+                "heap": Buffer.from(this.mem.heap),
+                "gfx": Buffer.from(this.mem.gfx),
+                "io": Buffer.from(this.mem.io),
+            },
+            "debugLevel": this.debugLevel
+        };
+    }
+
+    deserialize(o) {
+        this.IP = o.IP;
+        this.stack = o.stack;
+        this.code = o.code;
+        this.mem = new MemoryMap(
+            new Uint8Array(o.mem.heap), new Uint8Array(o.mem.gfx), new Uint8Array(o.mem.io));
+        this.debugLevel = o.debugLevel;
+    }
 };

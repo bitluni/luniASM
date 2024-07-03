@@ -3,13 +3,23 @@
 	<head>
 		<script src="Interpreter.js"></script>
 		<script>
-			const xres = 16;
-			const yres = 15;
+			var xres = 16;
+			var yres = 15;
 			let canvas = 0;
 			let ctx = 0;
 			let imageData = 0;
 			let interpreter = 0;
 			let compiler = new Compiler();
+
+			function resize()
+			{
+				xres = document.querySelector("#xres").value * 1;
+				yres = document.querySelector("#yres").value * 1;
+				canvas.width = xres;
+				canvas.height = yres;
+				ctx = canvas.getContext("2d")
+				imageData = ctx.getImageData(0, 0, xres, yres);				
+			}
 
 			function loop()
 			{
@@ -155,6 +165,12 @@
       			copyToClipboard(cArray);
 			}
 
+			function toClipboardBase64()
+			{
+				const code = compiler.compile(document.querySelector("textarea").value, console);
+      			copyToClipboard(btoa(code));
+			}
+
 		</script>
 		<style>
 			body
@@ -239,6 +255,8 @@ x:
 	pop					//pop clear y counter
 					</textarea></td>
 					<td><canvas width="16" height="15"></canvas>
+					<br>xres<input type="number" min="4" max="320" value="16" id="xres" style="width:50px" onchange="resize()">
+					yres<input type="number" min="4" max="240" value="15" id="yres" style="width:50px" onchange="resize()">
 					<br><button>L</button><button>R</button><button>U</button><button>D</button><button>B</button><button>A</button>
 					<br>
 					<br><button onclick="run()">run</button><button onclick="halt()">halt</button>
@@ -248,6 +266,7 @@ x:
 					<br><button onclick="document.querySelector('#loadBin').click()">load bin<input type="file" id="loadBin" accept=".bin" style="display:none" onchange="loadBin(event)"></button>
 					<button onclick="downloadBin()">save bin</button>
 					<br><button onclick="toClipboard()">c++ array to clipboard</button>
+					<br><button onclick="toClipboardBase64()">base64 clipboard</button>
 				</td>
 			</tr>
 			<tr>
