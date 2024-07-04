@@ -17,8 +17,9 @@
 				yres = document.querySelector("#yres").value * 1;
 				canvas.width = xres;
 				canvas.height = yres;
-				ctx = canvas.getContext("2d")
-				imageData = ctx.getImageData(0, 0, xres, yres);				
+				ctx = canvas.getContext("2d", { willReadFrequently: true });
+				imageData = ctx.getImageData(0, 0, xres, yres);
+				storeResolution(xres, yres);		
 			}
 
 			function loop()
@@ -54,9 +55,10 @@
 					}
 				}
 				canvas = document.querySelector("canvas");
+				restoreResolution();
 				canvas.width = xres;
 				canvas.height = yres;
-				ctx = canvas.getContext("2d")
+				ctx = canvas.getContext("2d", { willReadFrequently: true });
 				imageData = ctx.getImageData(0, 0, xres, yres);
 				requestAnimationFrame(loop);
 			}
@@ -82,6 +84,20 @@
 			{
 				localStorage.setItem("fileName", fileName);
 			}
+
+			function storeResolution(xres, yres)
+			{
+				localStorage.setItem("xres", xres);
+				localStorage.setItem("yres", yres);
+			}
+
+			function restoreResolution()
+			{
+				xres = localStorage.getItem("xres") || xres;
+				yres = localStorage.getItem("yres") || yres;
+				document.querySelector("#xres").value = xres;
+				document.querySelector("#yres").value = yres;
+			}			
 
 			function restoreCode()
 			{
@@ -183,7 +199,8 @@
 			canvas
 			{
 				image-rendering: pixelated;
-				zoom: 16.0;
+				width: 100%;
+				height: auto;
 				border-style: solid;
 				border-color: #ff1493;
 				border-width: 0.1px;
